@@ -31,11 +31,13 @@ func main() {
 	stopChan := make(chan struct{}, 0)
 	go logConsumer.TailingLogs(logGuid, "", outputChan, errorChan, stopChan)
 
+	say.Println(0, "Fetching logs for log-guid: %s", say.Green(logGuid))
+
 	for {
 		select {
 		case message := <-outputChan:
 			t := time.Unix(0, message.GetTimestamp())
-			say.Println(0, "%s [%s] %s", say.Green(t.Format("02 Jan 15:04")), say.Cyan("%4s", message.GetSourceType()), string(message.GetMessage()))
+			say.Println(0, "%s [%s|%s] %s", say.Green(t.Format("02 Jan 15:04")), say.Cyan("%s", message.GetSourceInstance()), say.Cyan("%s", message.GetSourceType()), string(message.GetMessage()))
 		case err := <-errorChan:
 			say.Println(0, say.Red("Error while streaming:\n%s", err.Error()))
 			return
